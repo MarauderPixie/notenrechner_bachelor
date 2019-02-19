@@ -17,22 +17,24 @@ ui <- fluidPage(
   theme = shinythemes::shinytheme("sandstone"),
   
   # Application title
-  titlePanel("Notenrechner für den Bachelor Psychologie in Bremen"),
+  h1("Notenrechner für den Bachelor Psychologie in Bremen", align = "center"),
   
   hr(),
   
   fluidRow(
     div(align = "center",
         p(strong("!! Alle Angaben ohne Gewähr !!")),
-        column(4, h3("Note laut PO:"), h3(textOutput("note"))),
-        column(4, h3("Note laut ToR:"), h3(textOutput("note_zpa"))),
-        column(4, h3("Note laut ToR ohne die BA:"), h3(textOutput("zpa_ohne_ba")))
+        column(4, h3("Note laut PO:"), h3(textOutput("note")),
+               p("(was auf dem Zeugnis stehen wird)")),
+        column(4, h3("Note laut ZPA:"), h3(textOutput("note_zpa")),
+               p("(was auf dem Transcript of Records steht)")),
+        column(4, h3("Note ohne die BA:"), h3(textOutput("zpa_ohne_ba")),
+               p("(womit sich meist beworben wird)"))
     )
   ),
   
   hr(),
   
-  # check for Prüfungsordnung & graded general studies
   fluidRow(
     
     sidebarLayout(
@@ -98,19 +100,6 @@ ui <- fluidPage(
 # Define server logic
 server <- function(input, output) {
   
-  # observeEvent(input$gs_note, {
-  #   gs_note <- input$gs_note
-  #   
-  #   if (gs_note == TRUE) {
-  #     insertUI(selector = "#gs_ui",
-  #              ui = column(4, numericInput("gs", "6 freie CP", 
-  #                                          4, 1.0, 4.0, width = 250)))
-  #   } else {
-  #     removeUI(selector = "#gs_ui")
-  #   }
-  #   # removeUI(selector = "#gs_ui"))
-  # })
-  
   observeEvent(input$calc, {
     df <- readRDS("bpo2017.rds")
     
@@ -145,29 +134,9 @@ server <- function(input, output) {
                               bachelorarbeit),
                             w = weight) %>% round(2)
     
-    # output$note <- renderText(paste("Note laut PO:", mean_w))
     output$note <- renderText(mean_w)
+
     
-    # note auf transcript / laut zpa:
-    # zpa_2017 <- c(bpo2017, "Wahlpflicht I", "Wahlpflicht II", "Bachelorarbeit")
-    # zpa_cp   <- c(cp_2017, 15, 15, 12)
-    # zpa_note <- c(note, n13, n14, n15)
-    # 
-    # zpa_result <- data.frame(
-    #   modul = zpa_2017,
-    #   cp    = zpa_cp,
-    #   note  = zpa_note
-    # ) %>% 
-    #   mutate(
-    #     zw1  = note * cp,
-    #     zw2  = zw1 / sum(cp)
-    #   )
-    # 
-    # zpa_note <- round(sum(zpa_result$zw1) / sum(zpa_result$cp), 2)
-    # zpa_ohne_ba <- round(sum(zpa_result$zw1[1:14]) / sum(zpa_result$cp[1:14]), 2)
-    # 
-    # # output$note_zpa <- renderText(paste("Note laut ZPA:", zpa_note))
-    # # output$zpa_ohne_ba <- renderText(paste("ohne die BA:", zpa_ohne_ba))
     zpa <- data.frame(
       modul = c("Wahlpflicht I", "Wahlpflicht II", "Bachelorarbeit"),
       cp    = c(15, 15, 12),
